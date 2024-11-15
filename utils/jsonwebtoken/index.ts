@@ -10,7 +10,7 @@ declare module "jsonwebtoken" {
 
 export const signToken = (data: {_id: Types.ObjectId; address: string; accessLevel: string}) => 
     jwt.sign(data, process.env.JSONWEBTOKEN_MESSAGE as string, {
-        expiresIn: process.env.JSONWEBTOKEN_EXPIRATION_Time,
+        expiresIn: process.env.JSONWEBTOKEN_EXPIRATION_TIME,
         issuer: process.env.JSONWEBTOKEN_ISSUER,
     })
 
