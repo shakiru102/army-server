@@ -4,6 +4,8 @@ import { UserInterface } from "../../../types";
 import userModel from "../../../models/userModel";
 import { signToken } from "../../../utils/jsonwebtoken";
 import rankModel from "../../../models/rankModel";
+import campaignModel from "../../../models/campaignModel";
+import tagModel from "../../../models/tagModel";
 
 export const signin = async (req: Request, res: Response) => {
 //   REQUEST BODY VALIDATION
@@ -107,5 +109,39 @@ export const getLeaderboard = async (req: Request, res: Response) => {
         success: true, 
         message: "leaderboard fetched successfully",
         leaderboard 
+    })
+}
+
+export const getCampaigns = async (req: Request, res: Response) => {
+    const campaigns = await campaignModel.find().sort({ createdAt: -1 }).populate({
+        path: "tweets",
+        populate: {
+            path: "userId"
+        }
+    })
+    .populate({
+        path: "users",
+        populate: { path: "userId" },
+    })
+    .populate({
+        path: "users",
+        populate: { 
+            path: "tweets", 
+            populate: { path: "tweets" }
+         },
+    });
+    res.status(200).json({ 
+        success: true,
+        message: "campaigns fetched successfully",
+        campaigns
+    })
+}
+
+export const getTags = async (req: Request, res: Response) => {
+    const tags = await tagModel.find({ is_campaign_tag: false })
+    res.status(200).json({ 
+        success: true,
+        message: "tags fetched successfully",
+        tags
     })
 }

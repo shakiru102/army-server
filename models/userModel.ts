@@ -8,7 +8,9 @@ const userSchema = new Schema<UserInterface>({
     points: { type: Number, default: 0 },
     rank: {type: Schema.Types.ObjectId, ref: "ranks"},
     profilePhoto: { type: String },
-    accessLevel: { type: String, default: "user" }
+    accessLevel: { type: String, default: "user" },
+    tags: [{ type: Schema.Types.ObjectId, ref: "tags" }],
+    campaigns: [{type: Schema.Types.ObjectId, ref: "campaigns"}] 
 }, {
     timestamps: true
 })
