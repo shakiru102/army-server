@@ -6,6 +6,9 @@ import campaignModel from "../../../models/campaignModel";
 import tagModel from "../../../models/tagModel";
 import tweetModel from "../../../models/tweetModel";
 import campaignUserModel from "../../../models/campaignUserModel";
+import { TweetInfoProps } from "../../../types";
+import axios from "axios";
+import { gettweetresponse } from "../../../utils/tweets";
 
 export const createRank = async (req: Request, res: Response) => {
      const { error } = rankValidation(req.body)
@@ -133,15 +136,18 @@ export const addCampaignTweets = async (req: Request, res: Response) => {
         return
     }
 //  GET TWEETS INFORMATION FROM THIRD PARTY
-
-
+    const tweetInfo = await gettweetresponse(req.body.tweetId)
+    const info: TweetInfoProps = tweetInfo.data as any
+    if(!info.data.data.tweetResult.result) {
+        res.status(400).json({
+            success: false,
+            message: "Tweet not found"
+        })
+        return
+    }
 // CREATE USER AND TWEET
-    const user = await userModel.findOne({
-        $or: [
-            { twitterUsername: "" },
-            {twitterHandle: ""}
-        ]
-    })
+    const user = await userModel.findOne({ twitterHandle: info.data.data.tweetResult.result.core.user_results.result.legacy.screen_name})
+    
     if(!user) {
         res.status(400).json({
             success: false,
@@ -149,8 +155,9 @@ export const addCampaignTweets = async (req: Request, res: Response) => {
         })
         return
     }
+    
     const isUser = await campaignUserModel.findOne({ campaignId: req.params.campaignId, userId: user._id })
-    const tweet = await tweetModel.create({ userId: user._id, views: "", campaignId: req.params.campaignId, ...req.body })
+    const tweet = await tweetModel.create({ userId: user._id, views: Number(info.data.data.tweetResult.result.views.count), campaignId: req.params.campaignId, ...req.body })
 
     if(isUser) {
         await Promise.all([
@@ -201,10 +208,18 @@ export const addCampaignTweets = async (req: Request, res: Response) => {
 export const syncTweetViews = async (req: Request, res: Response) => {
 
     // GET TWEET VIEWS
-
+    const tweetInfo = await gettweetresponse(req.params.tweetId)
+    const info: TweetInfoProps = tweetInfo.data as any
+    if(!info.data.data.tweetResult.result) {
+        res.status(400).json({
+            success: false,
+            message: "Tweet not found"
+        })
+        return
+    }
     // UPDATE TWEET VIEWS IN DB
     try {
-        await tweetModel.updateOne({ tweetId: req.params.tweetId }, { views: parseInt("") })
+        await tweetModel.updateOne({ tweetId: req.params.tweetId }, { views: Number(info.data.data.tweetResult.result.views.count) })
         res.status(200).json({
             success: true,
             message: "Tweet views updated successfully"

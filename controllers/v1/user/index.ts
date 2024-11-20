@@ -127,7 +127,6 @@ export const getCampaigns = async (req: Request, res: Response) => {
         path: "users",
         populate: { 
             path: "tweets", 
-            populate: { path: "tweets" }
          },
     });
     res.status(200).json({ 

@@ -60,3 +60,22 @@ export interface CampaignUserInterface {
     campaignId: Mongoose.Types.ObjectId;
     tweets: Mongoose.Types.ObjectId[]
 }
+
+export interface TweetInfoProps {
+    data: { 
+        data: { 
+            tweetResult: {  
+                result?: { 
+                    views: { count: number }, 
+                    core: { 
+                        user_results: { 
+                            result: { 
+                                legacy: { screen_name: string }
+                             } 
+                        } 
+                    } 
+                }
+            } 
+        } 
+    }
+}
