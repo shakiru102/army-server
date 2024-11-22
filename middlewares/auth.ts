@@ -2,8 +2,8 @@ import { NextFunction, Request, Response } from "express";
 import { verifyToken } from "../utils/jsonwebtoken";
 
 
-export const userAuth = (req: Request, res: Response, next: NextFunction) => {
-    const isExist = req.headers['authorization']
+export const userAuth =  (req: Request, res: Response, next: NextFunction) => {
+    const isExist =  req.headers['authorization']
     if(!isExist) {
          res.status(401).json({
             success: false,
@@ -12,17 +12,19 @@ export const userAuth = (req: Request, res: Response, next: NextFunction) => {
         return
     }
     const accessToken = isExist.replace("Bearer ", "")
-    const data = verifyToken(accessToken)
-    if(!data) {
-         res.status(401).json({
+    try {
+        const data = verifyToken(accessToken)
+        console.log(data);
+    // @ts-ignore
+    req.user = data as any
+    next()
+    } catch (error) {
+        res.status(401).json({
             success: false,
             message: "Unauthorized access"
         })
         return
     }
-    // @ts-ignore
-    req.user = data as any
-    next()
 }
 
 export const adminAuth = (req: Request, res: Response, next: NextFunction) => {
