@@ -38,6 +38,7 @@ export interface CampaignInterface {
     description: string;
     likePoint: number;
     retweetPoint: number;
+    is_campaign_active: boolean;
     users: Mongoose.Types.ObjectId[];
     tweets: Mongoose.Types.ObjectId[];
     

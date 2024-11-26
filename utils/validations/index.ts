@@ -49,7 +49,7 @@ const campaignTweetSchema = Joi.object<CampaignTweetInterface>({
     link: Joi.string().required(),
     tweetId: Joi.string().required(),
     username: Joi.string().required(),
-    retweeted: Joi.boolean()
+    retweeted: Joi.boolean().required()
 })
 
 export const campaignTweetValidation = (campaignTweet: CampaignTweetInterface): Joi.ValidationResult => {
