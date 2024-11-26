@@ -7,7 +7,7 @@ const campaignSchema = new Schema<CampaignInterface>({
     description: { type: String },
     users: [{ type: Schema.Types.ObjectId, ref: 'campaignUsers' }],
     tweets: [{ type: Schema.Types.ObjectId, ref: 'tweets' }],
-    is_campaign_active: { type: Boolean, default: false },
+    is_campaign_active: { type: Boolean, default: true },
     likePoint: { type: Number, default: 0 },
     retweetPoint: { type: Number, default: 0 }  // points earned in the campaign by the users who participate in it
 
