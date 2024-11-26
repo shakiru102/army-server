@@ -6,6 +6,7 @@ import { signToken } from "../../../utils/jsonwebtoken";
 import rankModel from "../../../models/rankModel";
 import campaignModel from "../../../models/campaignModel";
 import tagModel from "../../../models/tagModel";
+import { populate } from "dotenv";
 
 export const signin = async (req: Request, res: Response) => {
 //   REQUEST BODY VALIDATION
@@ -129,7 +130,12 @@ export const getCampaigns = async (req: Request, res: Response) => {
     })
     .populate({
         path: "users",
-        populate: { path: "userId" },
+        populate: { 
+            path: "userId",
+            populate: {
+                path: "rank"
+            } 
+        },
     })
     .populate({
         path: "users",
