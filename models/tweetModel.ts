@@ -6,7 +6,8 @@ const tweetSchema = new Schema<CampaignTweetInterface>({
     link: { type: String, required: true },
     campaignId: { type: Schema.Types.ObjectId, ref: 'campaigns', required: true },
     userId: { type: Schema.Types.ObjectId, ref: 'users', required: true },
-    views: { type: Number, default: 0 }
+    points: { type: Number, default: 0 },
+    retweeted: { type: Boolean, default: false },
 }, { timestamps: true })
 
 export default model<CampaignTweetInterface>('tweets', tweetSchema)

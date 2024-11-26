@@ -38,27 +38,35 @@ export const signin = async (req: Request, res: Response) => {
         ]
     });
 
-      console.log(rank, "rank");
       
      
-    if(rank) {
-        points = rank.multiplier * Number(process.env.ARMY_DAILY_MULTIPLIER)
-    }
+    
 
 
 
-   const userExits = await userModel.findOne({ address }).populate('rank')
+   const userExits = await userModel.findOne({ address })
+   .populate('rank')
+   .populate({ path: "tags" })
+   if(rank) {
+    // @ts-ignore
+    const tagsAccumulator = userExits ? Number(userExits.tags.reduce((acc, current) => acc + current.multiplier, 0)) : 0
+    const multiplier = rank.multiplier + tagsAccumulator
+    points = multiplier * Number(process.env.ARMY_DAILY_MULTIPLIER)
+}
    if(userExits) {
+    const now = new Date();
+    const twentyFourHoursLater = new Date(userExits.pointsUpdatedAt.getTime() + 24 * 60 * 60 * 1000);
     await userModel.updateOne({ address }, {
         $set: {
             twitterHandle,
             twitterUsername,
             profilePhoto,
-            ...( rank && {rank: rank?._id})
+            ...( rank && {rank: rank?._id}),
+            ...(now >= twentyFourHoursLater && {pointsUpdatedAt: Date.now})
         },
-        $inc: {
-            points
-        }
+        ...( now >= twentyFourHoursLater &&{$inc: {
+            points 
+        }})
     })
     
     const token = signToken({ _id: userExits._id, address: address, accessLevel: userExits.accessLevel })

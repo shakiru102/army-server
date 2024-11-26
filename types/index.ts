@@ -13,6 +13,7 @@ export interface UserInterface {
     accessLevel: "user" | "admin" | "super admin";
     tags: Mongoose.Types.ObjectId[];
     campaigns: Mongoose.Types.ObjectId[];
+    pointsUpdatedAt: Date 
 }
 
 export interface RankInterface {
@@ -35,11 +36,8 @@ export interface CampaignInterface {
     name: string;
     tag: string;
     description: string;
-    winner_multiplier: number;
-    first_place_point: number;
-    second_place_point: number;
-    third_place_point: number;
-    is_campaign_active: boolean;
+    likePoint: number;
+    retweetPoint: number;
     users: Mongoose.Types.ObjectId[];
     tweets: Mongoose.Types.ObjectId[];
     
@@ -51,7 +49,9 @@ export interface CampaignTweetInterface {
     link: string;
     campaignId: Mongoose.Types.ObjectId;
     userId: Mongoose.Types.ObjectId;
-    views: number;
+    points: number;
+    username: string;
+    retweeted: boolean;
 }
 
 export interface CampaignUserInterface {
@@ -59,6 +59,7 @@ export interface CampaignUserInterface {
     userId: Mongoose.Types.ObjectId;
     campaignId: Mongoose.Types.ObjectId;
     tweets: Mongoose.Types.ObjectId[]
+    campaignPoints: number;
 }
 
 export interface TweetInfoProps {

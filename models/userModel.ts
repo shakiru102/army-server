@@ -10,7 +10,8 @@ const userSchema = new Schema<UserInterface>({
     profilePhoto: { type: String },
     accessLevel: { type: String, default: "user" },
     tags: [{ type: Schema.Types.ObjectId, ref: "tags" }],
-    campaigns: [{type: Schema.Types.ObjectId, ref: "campaigns"}] 
+    campaigns: [{type: Schema.Types.ObjectId, ref: "campaigns"}],
+    pointsUpdatedAt: { type: Date, default: Date.now, required: true}
 }, {
     timestamps: true
 })

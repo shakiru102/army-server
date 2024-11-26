@@ -36,11 +36,9 @@ export const accessLevelValidation = (accessLevel: { accessLevel: string, userId
 const createCampaignSchema = Joi.object<CampaignInterface>({
     description: Joi.string(),
     name: Joi.string().required(),
-    tag: Joi.string().required(),
-    winner_multiplier: Joi.number().required(),
-    first_place_point: Joi.number().required(),
-    second_place_point: Joi.number().required(),
-    third_place_point: Joi.number().required()
+    tag: Joi.string(),
+    likePoint: Joi.number().required().min(0),
+    retweetPoint: Joi.number().required().min(0)
 })
 
 export const createCampaignValidation = (campaign: CampaignInterface): Joi.ValidationResult => {
@@ -50,25 +48,27 @@ export const createCampaignValidation = (campaign: CampaignInterface): Joi.Valid
 const campaignTweetSchema = Joi.object<CampaignTweetInterface>({
     link: Joi.string().required(),
     tweetId: Joi.string().required(),
+    username: Joi.string().required(),
+    retweeted: Joi.boolean()
 })
 
 export const campaignTweetValidation = (campaignTweet: CampaignTweetInterface): Joi.ValidationResult => {
     return campaignTweetSchema.validate(campaignTweet);
 }
 
-const endCampaignSchema = Joi.object<{
-    first_position: string[],
-    second_position: string[],
-    third_position: string[],
-}>({
-    first_position: Joi.array().items(Joi.string()).required(),
-    second_position: Joi.array().items(Joi.string()).required(),
-    third_position: Joi.array().items(Joi.string()).required(),
-})
+// const endCampaignSchema = Joi.object<{
+//     first_position: string[],
+//     second_position: string[],
+//     third_position: string[],
+// }>({
+//     first_position: Joi.array().items(Joi.string()).required(),
+//     second_position: Joi.array().items(Joi.string()).required(),
+//     third_position: Joi.array().items(Joi.string()).required(),
+// })
 
-export const endCampaignValidation = (endCampaign: { first_position: string[], second_position: string[], third_position: string[] }): Joi.ValidationResult => {
-    return endCampaignSchema.validate(endCampaign);
-}
+// export const endCampaignValidation = (endCampaign: { first_position: string[], second_position: string[], third_position: string[] }): Joi.ValidationResult => {
+//     return endCampaignSchema.validate(endCampaign);
+// }
 
 const tagSchema = Joi.object<TagInterface>({
     multiplier: Joi.number().required(),

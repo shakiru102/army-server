@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
-import { accessLevelValidation, campaignTweetValidation, createCampaignValidation, endCampaignValidation, rankValidation, tagValidation, updateTagValidation } from "../../../utils/validations";
+import { accessLevelValidation, campaignTweetValidation, createCampaignValidation, rankValidation, tagValidation, updateTagValidation } from "../../../utils/validations";
 import rankModel from "../../../models/rankModel";
 import userModel from "../../../models/userModel";
 import campaignModel from "../../../models/campaignModel";
 import tagModel from "../../../models/tagModel";
 import tweetModel from "../../../models/tweetModel";
 import campaignUserModel from "../../../models/campaignUserModel";
-import { TweetInfoProps } from "../../../types";
+import { CampaignInterface, TweetInfoProps } from "../../../types";
 import axios from "axios";
 import { gettweetresponse } from "../../../utils/tweets";
 
@@ -93,14 +93,7 @@ export const createCampaign = async (req: Request, res: Response) => {
         return
     }
 
-    const tagExists = await tagModel.findOne({ name: req.body.tag })
-    if(tagExists) {
-        res.status(400).json({
-            success: false,
-            message: "Tag already exists"
-        })
-        return
-    }
+    
 
     try {
         const campaign =  await campaignModel.create(req.body)
@@ -136,17 +129,22 @@ export const addCampaignTweets = async (req: Request, res: Response) => {
         return
     }
 //  GET TWEETS INFORMATION FROM THIRD PARTY
-    const tweetInfo = await gettweetresponse(req.body.tweetId)
-    const info: TweetInfoProps = tweetInfo.data as any
-    if(!info.data.data.tweetResult.result) {
-        res.status(400).json({
-            success: false,
-            message: "Tweet not found"
-        })
-        return
-    }
+    // const tweetInfo = await gettweetresponse(req.body.tweetId)
+    // const info: TweetInfoProps = tweetInfo.data as any
+    // if(!info.data.data.tweetResult.result) {
+    //     res.status(400).json({
+    //         success: false,
+    //         message: "Tweet not found"
+    //     })
+    //     return
+    // }
+
+    
 // CREATE USER AND TWEET
-    const user = await userModel.findOne({ twitterHandle: info.data.data.tweetResult.result.core.user_results.result.legacy.screen_name})
+    const user = await userModel.findOne({ $or: [
+        { twitterHandle: req.body.username },
+        { twitterUsername: req.body.username },
+    ] })
     
     if(!user) {
         res.status(400).json({
@@ -155,15 +153,27 @@ export const addCampaignTweets = async (req: Request, res: Response) => {
         })
         return
     }
-    
+    // @ts-ignore
+    const campaign: CampaignInterface = req.campaign
+    const retweetedPoints = req.body.retweeted ? campaign.retweetPoint : 0
     const isUser = await campaignUserModel.findOne({ campaignId: req.params.campaignId, userId: user._id })
-    const tweet = await tweetModel.create({ userId: user._id, views: Number(info.data.data.tweetResult.result.views.count), campaignId: req.params.campaignId, ...req.body })
+    const tweet = await tweetModel.create({ 
+        userId: user._id,
+        campaignId: req.params.campaignId, 
+        points: campaign.likePoint + retweetedPoints,
+        link: req.body.link,
+        tweetId: req.body.tweetId,
+        ...( req.body.retweeted && {retweeted: req.body.retweeted}),
+        })
 
     if(isUser) {
         await Promise.all([
             campaignUserModel.updateOne({ campaignId: req.params.campaignId, userId: user._id }, {
                 $push: {
                     tweets: tweet._id
+                },
+                $inc: {
+                    campaignPoints: campaign.likePoint + retweetedPoints
                 }
             }),
             campaignModel.updateOne({ _id: req.params.campaignId }, {
@@ -183,7 +193,8 @@ export const addCampaignTweets = async (req: Request, res: Response) => {
    const campaignUser = await campaignUserModel.create({
         userId: user._id,
         campaignId: req.params.campaignId,
-        tweets: [tweet]
+        tweets: [tweet],
+        campaignPoints: campaign.likePoint + retweetedPoints
     })
    await Promise.all([
         userModel.updateOne({ _id: user._id}, {
@@ -238,53 +249,27 @@ export const syncTweetViews = async (req: Request, res: Response) => {
 
 // Super Admin Controllers
 export const endCampaign = async (req: Request, res: Response) => {
-    const { error } = endCampaignValidation(req.body)
-    if(error) {
-        res.status(400).json({
-            success: false,
-            message: error.details[0].message
-        })
-        return
-    }
+    // const { error } = endCampaignValidation(req.body)
+    // if(error) {
+    //     res.status(400).json({
+    //         success: false,
+    //         message: error.details[0].message
+    //     })
+    //     return
+    // }
 
-    const campaign = await campaignModel.findOne({ _id: req.params.campaignId })
+    const campaign = await campaignModel.findOneAndUpdate(
+        { _id: req.params.campaignId }, 
+        { is_campaign_active: false }
+    )
     if(!campaign) {
         res.status(404).json({ success: false, message: 'Campaign not found' })
         return 
     }
-    const tag = await tagModel.create({
-        is_campaign_tag: true,
-        multiplier: campaign.winner_multiplier,
-        name: campaign.tag
-    })
-
-    await Promise.all([
-        userModel.updateMany({ 
-            $or: req.body.first_position.map((addr: string) => ({ address: addr }))
-        }, {
-            $push: {
-                tags: tag._id,
-            },
-            $inc: {
-                points: campaign.first_place_point
-            }
-        }),
-        userModel.updateMany({ 
-            $or: req.body.second_position.map((addr: string) => ({ address: addr }))
-         }, {
-            $inc: {
-                points: campaign.second_place_point
-            }
-        }),
-        userModel.updateMany({
-            $or: req.body.third_position.map((addr: string) => ({ address: addr }))
-        }, {
-            $inc: {
-                points: campaign.third_place_point
-            }
-        }),
-        campaignModel.updateOne({ _id: req.params.campaignId }, { is_campaign_active: false })
-    ])
+   res.status(200).json({
+    success: true,
+    message: "Campaign status updated successfully"
+   })    
 }
 export const updateAccessLevel = async (req: Request, res: Response) => {
    
