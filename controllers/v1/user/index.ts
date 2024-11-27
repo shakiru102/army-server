@@ -63,7 +63,9 @@ export const signin = async (req: Request, res: Response) => {
             twitterUsername,
             profilePhoto,
             ...( rank && {rank: rank?._id}),
-            ...(now >= twentyFourHoursLater && {pointsUpdatedAt: Date.now})
+            ...(now >= twentyFourHoursLater && {
+                pointsUpdatedAt: Date.now()
+            })
         },
         ...( now >= twentyFourHoursLater &&{$inc: {
             points 
