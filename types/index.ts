@@ -13,7 +13,8 @@ export interface UserInterface {
     accessLevel: "user" | "admin" | "super admin";
     tags: Mongoose.Types.ObjectId[];
     campaigns: Mongoose.Types.ObjectId[];
-    pointsUpdatedAt: Date 
+    pointsUpdatedAt: Date,
+    bonusPointsAwarded?: boolean;
 }
 
 export interface RankInterface {

@@ -45,7 +45,7 @@ export const signin = async (req: Request, res: Response) => {
 
 
 
-   const userExits = await userModel.findOne({ address })
+   const userExits = await userModel.findOne({ twitterHandle, twitterUsername })
    .populate('rank')
    .populate({ path: "tags" })
    if(rank) {
@@ -158,5 +158,26 @@ export const getTags = async (req: Request, res: Response) => {
         success: true,
         message: "tags fetched successfully",
         tags
+    })
+}
+
+export const awardBonusPoints = async (req: Request, res: Response) => {
+    const id = req.params.id
+    const user = await userModel.findOneAndUpdate({
+        _id: id,
+        bonusPointsAwarded: false
+    }, { 
+        $inc: {
+            points: 100
+        }
+    })
+    if(!user) {
+        res.status(400).json({ success: false, message: 'User not found or has already been awarder bonus points' })
+        return 
+    }
+
+    res.status(200).json({
+        success: true,
+        message: 'Bonus points awarded successfully',
     })
 }
