@@ -169,6 +169,9 @@ export const awardBonusPoints = async (req: Request, res: Response) => {
     }, { 
         $inc: {
             points: 100
+        },
+        $set: {
+            bonusPointsAwarded: true
         }
     })
     if(!user) {
