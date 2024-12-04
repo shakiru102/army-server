@@ -175,7 +175,7 @@ export const awardBonusPoints = async (req: Request, res: Response) => {
         }
     })
     if(!user) {
-        res.status(400).json({ success: false, message: 'User not found or has already been awarder bonus points' })
+        res.status(400).json({ success: false, message: 'User not found or has already been awarded bonus points' })
         return 
     }
 
