@@ -45,7 +45,12 @@ export const signin = async (req: Request, res: Response) => {
 
 
 
-   const userExits = await userModel.findOne({ twitterHandle, twitterUsername })
+   const userExits = await userModel.findOne({
+    $or: [
+        { twitterHandle, twitterUsername },
+        { address }
+    ]
+   })
    .populate('rank')
    .populate({ path: "tags" })
    if(rank) {
