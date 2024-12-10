@@ -47,7 +47,8 @@ export const signin = async (req: Request, res: Response) => {
 
    const userExits = await userModel.findOne({
     $or: [
-        { twitterHandle, twitterUsername },
+        { twitterHandle },
+        { twitterUsername },
         { address }
     ]
    })
