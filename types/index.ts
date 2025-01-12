@@ -15,6 +15,7 @@ export interface UserInterface {
     campaigns: Mongoose.Types.ObjectId[];
     pointsUpdatedAt: Date,
     bonusPointsAwarded?: boolean;
+    addresses?: {[key: string] : string }[]
 }
 
 export interface RankInterface {

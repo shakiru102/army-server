@@ -12,7 +12,16 @@ const userSchema = new Schema<UserInterface>({
     tags: [{ type: Schema.Types.ObjectId, ref: "tags" }],
     campaigns: [{type: Schema.Types.ObjectId, ref: "campaigns"}],
     pointsUpdatedAt: { type: Date, default: Date.now, required: true},
-    bonusPointsAwarded: { type: Boolean, default: false }
+    bonusPointsAwarded: { type: Boolean, default: false },
+    addresses: {
+        type: [{ type: Schema.Types.Mixed  }],
+        validate: {
+            validator: function (array) {
+              return Array.isArray(array) && array.every(item => typeof item === 'object' && !Array.isArray(item));
+            },
+            message: 'addresses must be an array of objects with dynamic keys.',
+          },
+    }
 }, {
     timestamps: true
 })

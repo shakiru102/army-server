@@ -90,7 +90,7 @@ export const signin = async (req: Request, res: Response) => {
     const user = await userModel.create({
         ...req.body, 
         points, 
-        ...(rank && { rank })
+        ...(rank && { rank }),
     })
     const token = signToken({ _id: user._id, address: address, accessLevel: user.accessLevel })
     res.status(200).json({
@@ -189,4 +189,42 @@ export const awardBonusPoints = async (req: Request, res: Response) => {
         success: true,
         message: 'Bonus points awarded successfully',
     })
+}
+
+export const linkUserExtendedAddress = async (req: Request, res: Response) => {
+    try {
+        const { address } = req.body
+    const id = req.params.id
+     await userModel.updateOne({ _id:  id}, {
+        $push: {
+            addresses: address
+        }
+    })
+
+    res.status(200).json({
+        success: true,
+        message: 'Extended address linked successfully',
+    })
+    } catch (error: any) {
+        res.status(400).json({ success: false, message: error.message })
+    }
+}
+
+export const unLinkUserExtendedAddress = async (req: Request, res: Response ) => { 
+    try {
+        const { address } = req.body
+    const id = req.params.id
+     await userModel.updateOne({ _id:  id}, {
+        $pull: {
+            addresses: address
+        }
+    })
+
+    res.status(200).json({
+        success: true,
+        message: 'Extended address unlinked successfully',
+    })
+    } catch (error: any) {
+        res.status(400).json({ success: false, message: error.message })
+    }
 }

@@ -14,7 +14,6 @@ export const userAuth =  (req: Request, res: Response, next: NextFunction) => {
     const accessToken = isExist.replace("Bearer ", "")
     try {
         const data = verifyToken(accessToken)
-        console.log(data);
     // @ts-ignore
     req.user = data as any
     next()
